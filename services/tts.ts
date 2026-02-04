@@ -5,24 +5,45 @@ if (typeof window !== 'undefined') {
     synth = window.speechSynthesis;
 }
 
-// Global reference to prevent garbage collection of the utterance while speaking
+// Global reference to prevent garbage collection of the utterance while speaking/paused
 let currentUtterance: SpeechSynthesisUtterance | null = null;
 
-// Helpers to select voice based on persona and availability
-const getPreferredVoice = (voices: SpeechSynthesisVoice[], persona: VoicePersona): SpeechSynthesisVoice | null => {
-    // Filter by language roughly if possible
-    const enVoices = voices.filter(v => v.lang.startsWith('en'));
+const isBengaliText = (text: string) => /[\u0980-\u09FF]/.test(text);
 
+// Helpers to select voice based on persona and availability
+const getPreferredVoice = (voices: SpeechSynthesisVoice[], persona: VoicePersona, text: string): SpeechSynthesisVoice | null => {
+    const isBengali = isBengaliText(text);
+
+    // CRITICAL FIX: If the text contains ANY Bengali, we MUST use a Bengali voice for the WHOLE text.
+    // Switching engines (e.g., using an English voice for English words in a Bengali sentence) 
+    // causes the "two people speaking" effect and robotic transitions.
+    // A Bengali voice reading English words sounds like a Bengali teacher speaking English, which is natural.
+    
+    if (isBengali) {
+        // Priority 1: Google Bengali (High quality on Android/Chrome)
+        const googleBn = voices.find(v => v.lang.includes('bn') && v.name.includes('Google'));
+        if (googleBn) return googleBn;
+        
+        // Priority 2: Any Bengali voice
+        const anyBn = voices.find(v => v.lang.includes('bn'));
+        if (anyBn) return anyBn;
+        
+        // Fallback: If no Bengali voice, use the default (will likely sound robotic for BN, but unavoidable)
+    }
+
+    // If text is purely English (or other), proceed with English persona logic
+    const enVoices = voices.filter(v => v.lang.startsWith('en'));
+    
     // Priority list for "AI-like" quality voices often found in browsers
     const priorities = [
         'Google US English', 
+        'Google UK English Female',
         'Microsoft Zira', 
         'Samantha', 
-        'Google UK English Female',
         'English United States'
     ];
     
-    // 1. Persona specific tweaks
+    // 1. Persona specific tweaks (Only applies if we aren't forced into Bengali mode)
     if (persona === 'storyteller' || persona === 'poetic') {
        // Try to find a male voice for variety if requested
        const male = enVoices.find(v => v.name.includes('Male') || v.name.includes('David') || v.name.includes('Guy'));
@@ -35,7 +56,7 @@ const getPreferredVoice = (voices: SpeechSynthesisVoice[], persona: VoicePersona
         if (found) return found;
     }
 
-    // 3. Fallback to first English or first available
+    // 3. Fallback
     return enVoices[0] || voices[0] || null;
 };
 
@@ -78,37 +99,38 @@ export const speakText = async (
       return false;
   }
 
+  // Create utterance
   const utterance = new SpeechSynthesisUtterance(text);
   
-  // Base Settings
+  // Voice Selection logic
+  const voices = synth.getVoices();
+  const voice = getPreferredVoice(voices, settings.persona, text);
+  if (voice) {
+      utterance.voice = voice;
+  }
+
+  // Settings Logic
   let rate = settings.speed || 1.0;
   let pitch = settings.pitch || 1.0;
 
-  // Persona Tweaks (parametric adjustments)
-  // Ensure 'standard' uses strict 1.0 if not modified by slider
-  if (settings.persona === 'standard') {
-      // Keep strictly as defined by user settings (default 1.0)
-  } else {
+  // Apply Persona tweaks ONLY if we are in a supported language (English)
+  // If we are forcing a Bengali voice, we keep pitch/rate fairly standard to ensure clarity
+  // as Bengali engines can distort easily with high pitch shifts.
+  if (settings.persona !== 'standard' && !isBengaliText(text)) {
       switch (settings.persona) {
           case 'teacher':
-              // Slightly slower, clear
               rate = Math.min(rate, 0.95); 
               break;
           case 'storyteller':
-              // Slower, dramatic
               rate = Math.min(rate, 0.9);
               break;
           case 'poetic':
-              // Slow, slight pitch drop
               rate = Math.min(rate, 0.85);
               pitch = Math.max(0.8, pitch * 0.95);
               break;
           case 'child_friendly':
-              // Higher pitch, energetic
               pitch = Math.min(1.4, pitch * 1.2);
               rate = Math.min(rate, 1.1);
-              break;
-          default:
               break;
       }
   }
@@ -117,16 +139,8 @@ export const speakText = async (
   utterance.pitch = pitch;
   utterance.volume = 1.0;
 
-  // Voice Selection
-  const voices = synth.getVoices();
-  const voice = getPreferredVoice(voices, settings.persona);
-  if (voice) {
-      utterance.voice = voice;
-  }
-
   // Event Handling
   utterance.onend = () => {
-      // Only clear if this is the active utterance
       if (currentUtterance === utterance) {
         currentUtterance = null;
         if (onEnd) onEnd();
@@ -134,14 +148,10 @@ export const speakText = async (
   };
   
   utterance.onerror = (e) => {
-      // 'canceled' or 'interrupted' are common and not critical errors
-      // Note: Some browsers fire 'interrupted' on pause, ignore it to prevent reset
       if (e.error !== 'canceled' && e.error !== 'interrupted') {
           console.error("TTS Error:", e);
           if (onError) onError(); 
       }
-      
-      // If it was just interrupted (paused), don't kill the reference
       if (e.error !== 'interrupted') {
           if (currentUtterance === utterance) {
              currentUtterance = null;
@@ -149,7 +159,7 @@ export const speakText = async (
       }
   };
 
-  currentUtterance = utterance;
+  currentUtterance = utterance; // Keep reference to prevent GC
   synth.speak(utterance);
   
   return true;
@@ -164,6 +174,7 @@ export const stopSpeaking = () => {
 
 export const pauseSpeaking = () => {
     if (synth) {
+        // Robust pause check
         if (!synth.paused && synth.speaking) {
             synth.pause();
         }
@@ -172,8 +183,7 @@ export const pauseSpeaking = () => {
 
 export const resumeSpeaking = () => {
     if (synth) {
-        if (synth.paused) {
-            synth.resume();
-        }
+        // Robust resume check: simply calling resume() is usually safe even if already playing
+        synth.resume();
     }
 };
