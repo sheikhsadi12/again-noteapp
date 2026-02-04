@@ -1,0 +1,5 @@
+{
+  "name": "Smart Notepad",
+  "description": "An AI-powered notepad that acts as your personal teacher. It can read English texts with Bangla explanations, recite stories with emotion, explain poems, and save your study history.",
+  "requestFramePermissions": []
+}
