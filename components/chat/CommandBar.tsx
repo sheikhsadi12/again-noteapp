@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Command } from '../../types';
 import { Plus, Languages, BookOpen, Feather, Sparkles, GraduationCap, X } from 'lucide-react';
@@ -53,8 +54,8 @@ const CommandBar: React.FC<CommandBarProps> = ({ commands, onCommandClick, onCom
                                 className={`
                                     flex-shrink-0 flex items-center space-x-1 px-3 py-1.5 rounded-lg border shadow-sm text-[11px] font-bold transition-all transform active:scale-95
                                     ${cmd.isCustom 
-                                        ? 'bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100' 
-                                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-emerald-300 hover:text-emerald-700'}
+                                        ? 'bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:border-indigo-800 dark:text-indigo-300' 
+                                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-[var(--primary-300)] hover:text-[var(--primary-700)] dark:bg-slate-700 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-600'}
                                 `}
                             >
                                 <Icon size={12} />
@@ -64,7 +65,7 @@ const CommandBar: React.FC<CommandBarProps> = ({ commands, onCommandClick, onCom
                     })}
                     <button
                         onClick={() => setShowAddCommand(true)}
-                        className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-slate-100 hover:bg-emerald-50 text-slate-400 hover:text-emerald-600 transition-colors"
+                        className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-slate-100 hover:bg-[var(--primary-50)] text-slate-400 hover:text-[var(--primary-600)] transition-colors dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-400"
                     >
                         <Plus size={14} />
                     </button>
@@ -74,12 +75,12 @@ const CommandBar: React.FC<CommandBarProps> = ({ commands, onCommandClick, onCom
             {/* Modal */}
             {showAddCommand && (
                 <div className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 animate-in fade-in zoom-in duration-200">
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm p-6 animate-in fade-in zoom-in duration-200 border border-slate-200 dark:border-slate-700">
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
-                                <Sparkles className="text-emerald-500"/> Custom Command
+                            <h3 className="font-bold text-slate-800 dark:text-white text-lg flex items-center gap-2">
+                                <Sparkles className="text-[var(--primary-500)]"/> Custom Command
                             </h3>
-                            <button onClick={() => setShowAddCommand(false)} className="bg-slate-100 p-1 rounded-full text-slate-500 hover:bg-slate-200">
+                            <button onClick={() => setShowAddCommand(false)} className="bg-slate-100 dark:bg-slate-700 p-1 rounded-full text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600">
                                 <X size={16} />
                             </button>
                         </div>
@@ -90,7 +91,7 @@ const CommandBar: React.FC<CommandBarProps> = ({ commands, onCommandClick, onCom
                                 <input 
                                     value={newCmdName}
                                     onChange={e => setNewCmdName(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none font-medium"
+                                    className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg p-3 text-sm focus:ring-2 focus:ring-[var(--primary-500)] outline-none font-medium dark:text-white"
                                     placeholder="e.g. Simplify"
                                 />
                             </div>
@@ -99,13 +100,13 @@ const CommandBar: React.FC<CommandBarProps> = ({ commands, onCommandClick, onCom
                                 <textarea 
                                     value={newCmdInstruction}
                                     onChange={e => setNewCmdInstruction(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none h-24 resize-none"
+                                    className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg p-3 text-sm focus:ring-2 focus:ring-[var(--primary-500)] outline-none h-24 resize-none dark:text-white"
                                     placeholder="e.g. Rewrite this text in simple words..."
                                 />
                             </div>
                             <button 
                                 onClick={handleSaveCustomCommand}
-                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-emerald-200 transition-all mt-2"
+                                className="w-full bg-[var(--primary-600)] hover:bg-[var(--primary-700)] text-white font-bold py-3 rounded-xl shadow-lg shadow-[var(--primary-200)] dark:shadow-none transition-all mt-2"
                             >
                                 Save Command
                             </button>

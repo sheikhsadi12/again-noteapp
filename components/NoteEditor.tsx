@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Volume2, Square, Loader2 } from 'lucide-react';
+import { Volume2, Square } from 'lucide-react';
 import { speakText, stopSpeaking } from '../services/tts';
 import * as Storage from '../services/storage';
 
@@ -16,7 +17,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({
   content,
   onChangeTitle,
   onChangeContent,
-  onTextSelect,
+  onTextSelect
 }) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
 
@@ -41,20 +42,24 @@ const NoteEditor: React.FC<NoteEditorProps> = ({
           setIsSpeaking(false);
       } else {
           if (!content.trim()) return;
-          setIsSpeaking(true);
+          
           const settings = Storage.getSettings();
           
-          await speakText(
+          const started = await speakText(
               content, 
               settings, 
-              () => setIsSpeaking(false), 
-              () => setIsSpeaking(false)
+              () => setIsSpeaking(false), // On Complete
+              () => setIsSpeaking(false)  // On Error
           );
+
+          if (started) {
+              setIsSpeaking(true);
+          }
       }
   };
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-950 transition-colors">
       <div className="p-6 pb-2">
         <div className="flex items-center justify-between">
             <input
@@ -62,7 +67,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({
             value={title}
             onChange={(e) => onChangeTitle(e.target.value)}
             placeholder="Note Title..."
-            className="w-full text-3xl font-bold text-slate-800 placeholder-slate-300 border-none outline-none bg-transparent mr-4"
+            className="w-full text-3xl font-bold text-slate-800 dark:text-slate-100 placeholder-slate-300 dark:placeholder-slate-700 border-none outline-none bg-transparent mr-4"
             />
             
             <button
@@ -70,15 +75,15 @@ const NoteEditor: React.FC<NoteEditorProps> = ({
                 className={`
                     p-2 rounded-full transition-all flex-shrink-0
                     ${isSpeaking 
-                        ? 'bg-red-50 text-red-500 hover:bg-red-100' 
-                        : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'}
+                        ? 'bg-red-50 text-red-500 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400' 
+                        : 'bg-[var(--primary-50)] text-[var(--primary-600)] hover:bg-[var(--primary-100)] dark:bg-[var(--primary-900)]/20 dark:text-[var(--primary-400)] dark:hover:bg-[var(--primary-900)]/40'}
                 `}
                 title={isSpeaking ? "Stop Reading" : "Read Aloud"}
             >
                 {isSpeaking ? <Square size={20} fill="currentColor" /> : <Volume2 size={20} />}
             </button>
         </div>
-        <div className="h-px bg-slate-200 mt-4 w-full" />
+        <div className="h-px bg-slate-200 dark:bg-slate-800 mt-4 w-full" />
       </div>
       
       <div className="flex-1 p-6 pt-2 overflow-hidden">
@@ -87,7 +92,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({
           onChange={(e) => onChangeContent(e.target.value)}
           onSelect={handleSelect}
           placeholder="Start writing here... Select text to ask the AI Teacher."
-          className="w-full h-full resize-none border-none outline-none text-lg text-slate-600 leading-relaxed font-serif bg-transparent placeholder-slate-300"
+          className="w-full h-full resize-none border-none outline-none text-lg text-slate-700 dark:text-slate-300 leading-relaxed font-serif bg-transparent placeholder-slate-400 dark:placeholder-slate-700 selection:bg-[var(--primary-200)] dark:selection:bg-[var(--primary-900)]"
         />
       </div>
     </div>

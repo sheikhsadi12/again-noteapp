@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from 'react';
 import { Message } from '../../types';
 import { BookOpen, Copy, FileText, Printer, Share2, Volume2, Loader2 } from 'lucide-react';
@@ -24,12 +25,12 @@ const MessageAction = ({ onClick, icon: Icon, label, isLoading, isActive }: { on
       disabled={isLoading}
       className={`px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-medium disabled:opacity-50
           ${isActive 
-              ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500' 
-              : 'text-slate-500 hover:text-emerald-700 hover:bg-emerald-50'}
+              ? 'bg-[var(--primary-100)] text-[var(--primary-700)] ring-1 ring-[var(--primary-500)] dark:bg-[var(--primary-900)]/40 dark:text-[var(--primary-300)]' 
+              : 'text-slate-500 hover:text-[var(--primary-700)] hover:bg-[var(--primary-50)] dark:text-slate-400 dark:hover:text-[var(--primary-300)] dark:hover:bg-slate-800'}
       `}
       title={label}
     >
-      {isLoading ? <Loader2 size={14} className="animate-spin text-emerald-600" /> : <Icon size={14} />}
+      {isLoading ? <Loader2 size={14} className="animate-spin text-[var(--primary-600)]" /> : <Icon size={14} />}
       {label && <span>{label}</span>}
     </button>
 );
@@ -50,38 +51,38 @@ const MessageList: React.FC<MessageListProps> = ({
     }, [messages, isLoading]);
 
     return (
-        <div className="flex-1 overflow-y-auto p-4 pb-20 space-y-6 bg-gradient-to-b from-slate-50 to-white">
+        <div className="flex-1 overflow-y-auto p-4 pb-20 space-y-8 bg-white dark:bg-slate-900 transition-colors">
             {messages.length === 0 && (
-                <div className="text-center text-slate-400 mt-10">
-                    <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <BookOpen size={24} className="text-emerald-300" />
+                <div className="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-600">
+                    <div className="w-16 h-16 bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/20 rounded-full flex items-center justify-center mb-4">
+                        <BookOpen size={24} className="text-[var(--primary-400)] dark:text-[var(--primary-600)]" />
                     </div>
-                    <p className="font-medium text-slate-500">How can I help you learn?</p>
-                    <p className="text-sm mt-1">Select text, upload a math problem, or ask a question.</p>
+                    <p className="font-medium text-slate-500 dark:text-slate-400">How can I help you learn?</p>
+                    <p className="text-sm mt-1 opacity-80">Select text or ask a question.</p>
                 </div>
             )}
             
             {messages.map((msg) => (
-                <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
                 
                 {/* Message Bubble */}
                 <div className={`
-                    max-w-[95%] rounded-2xl px-5 py-4 shadow-sm relative transition-all duration-200
+                    max-w-[95%] lg:max-w-[90%] rounded-2xl px-5 py-3.5 shadow-sm relative transition-all duration-200 text-sm leading-relaxed
                     ${msg.role === 'user' 
-                        ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-tr-none' 
-                        : 'bg-white text-slate-700 border border-slate-100 rounded-tl-none hover:shadow-md'}
+                        ? 'bg-gradient-to-br from-[var(--primary-500)] to-[var(--primary-600)] text-white rounded-tr-sm' 
+                        : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-100 dark:border-slate-700 rounded-tl-sm'}
                     `}
                 >
                     {/* Show Attachment if exists */}
                     {msg.attachment && (
-                        <div className="mb-3 rounded-lg overflow-hidden border border-white/20">
-                            <img src={msg.attachment} alt="User upload" className="max-w-full max-h-60 object-contain bg-black/10" />
+                        <div className="mb-3 rounded-lg overflow-hidden border border-white/20 bg-black/5">
+                            <img src={msg.attachment} alt="User upload" className="max-w-full max-h-60 object-contain mx-auto" />
                         </div>
                     )}
 
-                    <div className="prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-strong:text-current">
+                    <div className={`prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-strong:text-current ${msg.role === 'user' ? 'prose-invert text-white' : 'dark:prose-invert'}`}>
                     {msg.role === 'user' ? (
-                        <p className="whitespace-pre-wrap text-sm">{msg.content}</p>
+                        <p className="whitespace-pre-wrap">{msg.content}</p>
                     ) : (
                         <ReactMarkdown 
                             remarkPlugins={[remarkMath]} 
@@ -95,7 +96,7 @@ const MessageList: React.FC<MessageListProps> = ({
 
                 {/* Toolbar - Placed BELOW message */}
                 {msg.role === 'model' && (
-                    <div className="flex flex-wrap items-center gap-1 mt-2 ml-2 pt-1 border-t border-slate-50/0 hover:border-slate-100 transition-all opacity-80 hover:opacity-100">
+                    <div className="flex flex-wrap items-center gap-1 mt-2 ml-1 opacity-70 hover:opacity-100 transition-opacity">
                         <MessageAction 
                             onClick={() => onSpeak(msg.content, msg.id)} 
                             icon={loadingAudioId === msg.id ? Loader2 : Volume2} 
@@ -103,24 +104,24 @@ const MessageList: React.FC<MessageListProps> = ({
                             isLoading={loadingAudioId === msg.id}
                             isActive={playingMsgId === msg.id}
                         />
-                        <MessageAction onClick={() => onCopy(msg.content)} icon={Copy} label="Copy" />
-                        <div className="w-px h-3 bg-slate-300 mx-2"></div>
-                        <MessageAction onClick={() => onExport(msg.content)} icon={FileText} label="Doc" />
-                        <MessageAction onClick={() => onPrint(msg.content)} icon={Printer} label="PDF" />
-                        <MessageAction onClick={() => onShare(msg.content)} icon={Share2} label="Share" />
+                        <div className="w-px h-3 bg-slate-300 dark:bg-slate-700 mx-2"></div>
+                        <MessageAction onClick={() => onCopy(msg.content)} icon={Copy} />
+                        <MessageAction onClick={() => onExport(msg.content)} icon={FileText} />
+                        <MessageAction onClick={() => onPrint(msg.content)} icon={Printer} />
+                        <MessageAction onClick={() => onShare(msg.content)} icon={Share2} />
                     </div>
                 )}
                 </div>
             ))}
 
             {isLoading && (
-                <div className="flex justify-start">
-                    <div className="bg-white p-4 rounded-2xl rounded-tl-none border border-slate-100 shadow-sm flex items-center space-x-2">
-                        <span className="text-xs font-bold text-emerald-600 animate-pulse">Thinking...</span>
+                <div className="flex justify-start animate-in fade-in">
+                    <div className="bg-slate-50 dark:bg-slate-800 px-4 py-3 rounded-2xl rounded-tl-sm border border-slate-100 dark:border-slate-700 shadow-sm flex items-center space-x-3">
+                        <span className="text-xs font-bold text-[var(--primary-600)] dark:text-[var(--primary-400)] animate-pulse">Thinking...</span>
                         <div className="flex space-x-1">
-                            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                            <div className="w-1.5 h-1.5 bg-[var(--primary-500)] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <div className="w-1.5 h-1.5 bg-[var(--primary-500)] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                            <div className="w-1.5 h-1.5 bg-[var(--primary-500)] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                         </div>
                     </div>
                 </div>

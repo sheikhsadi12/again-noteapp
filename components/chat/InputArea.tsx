@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from 'react';
 import { Send, Image as ImageIcon, X } from 'lucide-react';
 
@@ -16,7 +17,7 @@ const InputArea: React.FC<InputAreaProps> = ({
     input, setInput, 
     attachedImage, setAttachedImage, 
     onSend, isLoading, 
-    selectedText, onClearSelection 
+    selectedText, onClearSelection
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -41,21 +42,21 @@ const InputArea: React.FC<InputAreaProps> = ({
     };
 
     return (
-        <div className="bg-white border-t border-slate-200 z-30 shrink-0 shadow-[0_-5px_15px_-5px_rgba(0,0,0,0.05)]">
+        <div className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 z-30 shrink-0 shadow-[0_-5px_15px_-5px_rgba(0,0,0,0.05)] transition-colors">
             
             {/* Selected Text Indicator */}
             {selectedText && (
-                <div className="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs border-b border-emerald-100 flex justify-between items-center">
+                <div className="px-3 py-1.5 bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/20 text-[var(--primary-700)] dark:text-[var(--primary-300)] text-xs border-b border-[var(--primary-100)] dark:border-[var(--primary-800)] flex justify-between items-center">
                     <span className="truncate max-w-[240px] font-medium opacity-90">"{selectedText.substring(0, 40)}..."</span>
-                    <button onClick={onClearSelection} className="text-emerald-500 hover:text-emerald-700 p-1"><X size={12}/></button>
+                    <button onClick={onClearSelection} className="text-[var(--primary-500)] hover:text-[var(--primary-700)] dark:hover:text-[var(--primary-300)] p-1"><X size={12}/></button>
                 </div>
             )}
 
             {/* Image Preview */}
             {attachedImage && (
-                <div className="px-3 py-2 bg-slate-50 border-b border-slate-200 flex items-start gap-3">
+                <div className="px-3 py-2 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-start gap-3">
                     <div className="relative group">
-                        <img src={attachedImage} alt="Preview" className="h-16 w-16 object-cover rounded-lg border border-slate-300 shadow-sm" />
+                        <img src={attachedImage} alt="Preview" className="h-16 w-16 object-cover rounded-lg border border-slate-300 dark:border-slate-600 shadow-sm" />
                         <button 
                             onClick={() => setAttachedImage(null)}
                             className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 shadow-md hover:bg-red-600"
@@ -63,8 +64,8 @@ const InputArea: React.FC<InputAreaProps> = ({
                             <X size={12} />
                         </button>
                     </div>
-                    <div className="text-xs text-slate-500 mt-1">
-                        <p className="font-semibold text-slate-700">Image attached</p>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        <p className="font-semibold text-slate-700 dark:text-slate-200">Image attached</p>
                         <p>AI will analyze this image.</p>
                     </div>
                 </div>
@@ -83,20 +84,20 @@ const InputArea: React.FC<InputAreaProps> = ({
                 />
                 <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="mb-1 p-2 rounded-full text-slate-400 hover:text-emerald-600 hover:bg-slate-100 transition-colors"
+                    className="mb-1 p-2 rounded-full text-slate-400 hover:text-[var(--primary-600)] hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                     title="Upload Image"
                 >
                     <ImageIcon size={20} />
                 </button>
 
-                <div className="flex-1 relative bg-slate-100 rounded-2xl focus-within:ring-2 focus-within:ring-emerald-500 focus-within:bg-white transition-all">
+                <div className="flex-1 relative bg-slate-100 dark:bg-slate-700 rounded-2xl focus-within:ring-2 focus-within:ring-[var(--primary-500)] focus-within:bg-white dark:focus-within:bg-slate-800 transition-all">
                     <textarea
                         ref={textareaRef}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         placeholder={selectedText ? "Ask about selected..." : "Type here... (Enter for new line)"}
                         rows={1}
-                        className="w-full bg-transparent text-slate-800 rounded-2xl pl-4 pr-4 py-3 text-sm focus:outline-none resize-none max-h-32"
+                        className="w-full bg-transparent text-slate-800 dark:text-slate-100 rounded-2xl pl-4 pr-4 py-3 text-sm focus:outline-none resize-none max-h-32 placeholder-slate-400"
                         style={{ minHeight: '44px' }}
                     />
                 </div>
@@ -104,7 +105,7 @@ const InputArea: React.FC<InputAreaProps> = ({
                 <button
                     onClick={onSend}
                     disabled={(!input && !selectedText && !attachedImage) || isLoading}
-                    className="mb-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white p-3 rounded-full shadow-lg transform transition-transform active:scale-90 flex-shrink-0"
+                    className="mb-1 bg-[var(--primary-600)] hover:bg-[var(--primary-700)] disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white p-3 rounded-full shadow-lg transform transition-transform active:scale-90 flex-shrink-0"
                 >
                     <Send size={18} />
                 </button>

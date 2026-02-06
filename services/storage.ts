@@ -1,8 +1,10 @@
-import { Note, Command, VoiceSettings, VoicePersona } from '../types';
+
+import { Note, Command, VoiceSettings, VoicePersona, AppSettings } from '../types';
 
 const STORAGE_KEY = 'smart_teacher_notes';
 const COMMANDS_KEY = 'smart_teacher_commands';
 const SETTINGS_KEY = 'smart_teacher_settings';
+const APP_SETTINGS_KEY = 'smart_teacher_app_settings';
 
 // --- Notes Storage ---
 
@@ -113,7 +115,7 @@ export const deleteCustomCommand = (id: string): void => {
 
 // --- Settings Storage ---
 
-const DEFAULT_SETTINGS: VoiceSettings = {
+const DEFAULT_VOICE_SETTINGS: VoiceSettings = {
   voiceURI: null,
   speed: 1.0,
   pitch: 1.0,
@@ -123,12 +125,30 @@ const DEFAULT_SETTINGS: VoiceSettings = {
 export const getSettings = (): VoiceSettings => {
   try {
     const data = localStorage.getItem(SETTINGS_KEY);
-    return data ? JSON.parse(data) : DEFAULT_SETTINGS;
+    return data ? JSON.parse(data) : DEFAULT_VOICE_SETTINGS;
   } catch {
-    return DEFAULT_SETTINGS;
+    return DEFAULT_VOICE_SETTINGS;
   }
 };
 
 export const saveSettings = (settings: VoiceSettings) => {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 };
+
+const DEFAULT_APP_SETTINGS: AppSettings = {
+    themeMode: 'light',
+    themeColor: 'emerald'
+};
+
+export const getAppSettings = (): AppSettings => {
+    try {
+        const data = localStorage.getItem(APP_SETTINGS_KEY);
+        return data ? JSON.parse(data) : DEFAULT_APP_SETTINGS;
+    } catch {
+        return DEFAULT_APP_SETTINGS;
+    }
+}
+
+export const saveAppSettings = (settings: AppSettings) => {
+    localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(settings));
+}

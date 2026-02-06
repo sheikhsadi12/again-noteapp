@@ -1,3 +1,4 @@
+
 export interface Message {
   id: string;
   role: 'user' | 'model';
@@ -35,4 +36,13 @@ export interface VoiceSettings {
 export interface TtsState {
   isSpeaking: boolean;
   isPaused: boolean;
+}
+
+export type ThemeMode = 'light' | 'dark';
+// ThemeColor is now just a string to support Hex codes, but we keep the type alias for clarity
+export type ThemeColor = string; 
+
+export interface AppSettings {
+    themeMode: ThemeMode;
+    themeColor: ThemeColor; // Can be 'emerald' or '#ff0000'
 }

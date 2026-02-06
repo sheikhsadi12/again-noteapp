@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Command, VoiceSettings, Note } from '../types';
 import { Sparkles, Download, ChevronDown, Settings } from 'lucide-react';
@@ -97,44 +98,22 @@ const TeacherPanel: React.FC<TeacherPanelProps> = ({
     setAttachedImage(null);
   };
 
-  const cleanTextForSpeech = (text: string): string => {
-      return text
-        .replace(/\*\*(.*?)\*\*/g, '$1')
-        .replace(/\*(.*?)\*/g, '$1')
-        .replace(/`([^`]+)`/g, '$1')
-        .replace(/#+\s/g, '')
-        .replace(/\[.*?\]/g, '')
-        .replace(/\$\$.*?\$\$/g, ' equation ')
-        .replace(/\$.*?\$/g, ' equation ')
-        .replace(/[\|_~]/g, ' ')
-        .replace(/\n\s*\n/g, '. ');
-  };
-
   const handleSpeak = async (text: string, msgId: string) => {
     if (loadingAudioId === msgId) return;
 
     if (playingMsgId === msgId) { 
-        if (isPaused) {
-            resumeSpeaking();
-            setIsPaused(false);
-        } else {
-            pauseSpeaking();
-            setIsPaused(true);
-        }
+        handlePauseResumeAudio();
         return;
     } 
 
-    if (!text) return;
+    handleStopAudio(); 
     
-    setIsSpeaking(false);
-    setIsPaused(false);
-    setPlayingMsgId(null);
+    if (!text) return;
+
     setLoadingAudioId(msgId);
     
-    const cleanText = cleanTextForSpeech(text);
-
     const started = await speakText(
-        cleanText, 
+        text, 
         voiceSettings, 
         () => {
             setIsSpeaking(false);
@@ -156,7 +135,7 @@ const TeacherPanel: React.FC<TeacherPanelProps> = ({
         setPlayingMsgId(msgId);
         setLoadingAudioId(null);
     } else {
-        if (loadingAudioId === msgId) setLoadingAudioId(null);
+        setLoadingAudioId(null);
     }
   };
 
@@ -169,8 +148,14 @@ const TeacherPanel: React.FC<TeacherPanelProps> = ({
   };
 
   const handlePauseResumeAudio = () => {
-      if(isPaused) resumeSpeaking(); else pauseSpeaking();
-      setIsPaused(!isPaused);
+      if (isPaused) {
+          resumeSpeaking();
+          setIsPaused(false);
+          setIsSpeaking(true);
+      } else {
+          pauseSpeaking();
+          setIsPaused(true);
+      }
   };
 
   const handleShare = async (text: string) => {
@@ -185,13 +170,13 @@ const TeacherPanel: React.FC<TeacherPanelProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 font-sans shadow-inner z-20 relative">
+    <div className="flex flex-col h-full bg-white dark:bg-slate-900 font-sans z-20 relative transition-colors">
       
       {/* 1. Header & Controls */}
-      <div className="px-4 py-3 bg-white border-b border-slate-200 flex items-center justify-between shrink-0">
-        <div className="flex items-center space-x-2 text-slate-800 font-extrabold tracking-tight">
-          <div className="bg-emerald-100 p-1.5 rounded-lg">
-            <Sparkles className="text-emerald-600" size={18} />
+      <div className="px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
+        <div className="flex items-center space-x-2 text-slate-800 dark:text-slate-100 font-extrabold tracking-tight">
+          <div className="bg-[var(--primary-100)] dark:bg-[var(--primary-900)]/30 p-1.5 rounded-lg">
+            <Sparkles className="text-[var(--primary-600)] dark:text-[var(--primary-400)]" size={18} />
           </div>
           <span>AI Teacher</span>
         </div>
@@ -201,23 +186,23 @@ const TeacherPanel: React.FC<TeacherPanelProps> = ({
            <div className="relative">
              <button 
                   onClick={() => setShowExportMenu(!showExportMenu)}
-                  className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-100 transition-all text-xs font-bold"
+                  className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-[var(--primary-50)] text-[var(--primary-700)] hover:bg-[var(--primary-100)] border border-[var(--primary-100)] dark:bg-[var(--primary-900)]/20 dark:text-[var(--primary-300)] dark:border-[var(--primary-800)] transition-all text-xs font-bold"
                   title="Export Options"
              >
                   <Download size={14} /> <span>Export</span> <ChevronDown size={12} />
              </button>
              
              {showExportMenu && (
-               <div className="absolute right-0 top-full mt-2 w-36 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100">
+               <div className="absolute right-0 top-full mt-2 w-36 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100">
                  <button 
                     onClick={() => { ExportService.exportChatToDoc(currentNote); setShowExportMenu(false); }}
-                    className="w-full text-left px-4 py-2 text-xs font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 block"
+                    className="w-full text-left px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-[var(--primary-50)] dark:hover:bg-[var(--primary-900)]/30 hover:text-[var(--primary-700)] block"
                  >
                     Download All (DOCX)
                  </button>
                  <button 
                     onClick={() => { ExportService.printChat(currentNote); setShowExportMenu(false); }}
-                    className="w-full text-left px-4 py-2 text-xs font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 block border-t border-slate-50"
+                    className="w-full text-left px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-[var(--primary-50)] dark:hover:bg-[var(--primary-900)]/30 hover:text-[var(--primary-700)] block border-t border-slate-50 dark:border-slate-700"
                  >
                     Print All (PDF)
                  </button>
@@ -228,7 +213,7 @@ const TeacherPanel: React.FC<TeacherPanelProps> = ({
            {/* Voice Settings Button */}
            <button 
                 onClick={() => setShowSettings(!showSettings)}
-                className={`p-2 rounded-full transition-colors ${showSettings ? 'bg-slate-200 text-slate-800' : 'text-slate-400 hover:bg-slate-100'}`}
+                className={`p-2 rounded-full transition-colors ${showSettings ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-700'}`}
                 title="Voice Settings"
            >
                 <Settings size={18} />
@@ -241,11 +226,11 @@ const TeacherPanel: React.FC<TeacherPanelProps> = ({
           <VoiceSettingsPanel 
             settings={voiceSettings} 
             onUpdate={setVoiceSettings} 
-            onClose={() => setShowSettings(false)} 
+            onClose={() => setShowSettings(false)}
           />
       )}
 
-      {/* 2. Chat Area */}
+      {/* 2. Chat Area - MessageList handles its own background */}
       <MessageList 
         messages={messages}
         isLoading={isLoading}
@@ -269,11 +254,11 @@ const TeacherPanel: React.FC<TeacherPanelProps> = ({
       />
 
       {/* 4. Command Bar & Input Area */}
-      <div className="bg-white border-t border-slate-200 z-30 shrink-0 shadow-[0_-5px_15px_-5px_rgba(0,0,0,0.05)]">
+      <div className="bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 z-30 shrink-0 shadow-[0_-5px_15px_-5px_rgba(0,0,0,0.02)]">
          <CommandBar 
             commands={commands} 
             onCommandClick={handleCommandClick} 
-            onCommandsUpdated={loadCommands} 
+            onCommandsUpdated={loadCommands}
          />
          <InputArea 
             input={input}
